@@ -1,0 +1,81 @@
+import tkinter as tk
+import calendar
+import datetime
+
+def save_memo():
+    selected_date = calendar_label.cget("text")
+    memo = memo_entry.get()
+    file_name = selected_date.replace("-", "_") + ".txt"  # 선택된 버튼의 날짜로 파일 이름 생성
+    
+    with open(file_name, 'w', encoding='utf-8') as file:
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")  # 현재 날짜 가져오기
+        file.write(f"Date: {current_date}\n")  # Date를 현재 날짜로 변경
+        file.write(f"Memo: {memo}")
+    
+    print("메모가 저장되었습니다.")
+    print("파일 이름:", file_name)
+    print("날짜:", current_date)
+    print("메모 내용:", memo)
+
+def select_date(date):
+    calendar_label.config(text=date)
+
+# tkinter 윈도우 생성
+window = tk.Tk()
+window.title("Calendar")
+
+# 현재 연도와 월 가져오기
+now = calendar.datetime.datetime.now()
+year = now.year
+month = now.month
+
+# 현재 달의 첫 날과 마지막 날 구하기
+first_day, last_day = calendar.monthrange(year, month)
+
+# 캘린더 생성
+cal = calendar.monthcalendar(year, month)
+
+# 캘린더 라벨
+calendar_label = tk.Label(window, text="")
+calendar_label.pack()
+
+# 날짜 버튼 생성 및 배치
+for week in cal:
+    week_frame = tk.Frame(window)
+    week_frame.pack()
+    for day in week:
+        if day != 0:
+            date = str(day)
+            button = tk.Button(week_frame, text=date, width=4, command=lambda date=date: select_date(date), relief=tk.RAISED, bg='white', fg='black')
+            button.pack(side="left")
+            if day == now.day and month == now.month:  # 현재 날짜 표시
+                button.configure(bg="lightblue")
+        else:
+            # 비어있는 날짜는 빈 레이블로 채웁니다.
+            empty_label = tk.Label(week_frame, text="", width=4)
+            empty_label.pack(side="left")
+            
+# 요일 정보 표시
+weekday_frame = tk.Frame(window)
+weekday_frame.pack()
+weekday_names = ['월', '화', '수', '목', '금', '토', '일']
+for weekday in range(7):
+    if weekday == now.weekday():  # 오늘의 요일 표시
+        weekday_label = tk.Label(weekday_frame, text=weekday_names[weekday], width=4, font=("Arial", 12, "bold"), fg='red')
+    else:
+        weekday_label = tk.Label(weekday_frame, text='', width=4)
+    weekday_label.pack(side="left")
+
+# 메모 입력 필드
+memo_entry = tk.Entry(window)
+memo_entry.pack()
+
+# 메모 저장 버튼
+save_button = tk.Button(window, text="메모 저장", command=save_memo)
+save_button.pack()
+
+# 초기 날짜 선택
+select_date(f"{year}-{month:02d}")
+
+# tkinter 이벤트 루프 시작
+window.mainloop()
